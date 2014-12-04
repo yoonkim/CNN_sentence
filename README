@@ -1,0 +1,33 @@
+Yoon Kim
+yhk255@nyu.edu
+September 24, 2014
+
+Code for:
+
+Convolutional Neural Networks for Sentence Classification
+EMNLP 2014
+http://arxiv.org/abs/1408.5882
+
+This runs the model on Pang and Lee's movie review dataset (MR in the paper).
+Please cite the original paper when using the data.
+
+Instructions:
+
+1. with all the files in folder, run
+
+python process_data.py -path
+
+where -path points to the word2vec binary file (i.e. GoogleNews-vectors-negative300.bin file). 
+Downloadable at https://code.google.com/p/word2vec/
+This will create a pickle object called "mr.p" in the same folder, which contains the dataset in the right format.
+
+2. run
+
+python conv_net_sentence.py -nonstatic -rand
+python conv_net_sentence.py -static -word2vec
+python conv_net_sentence.py -nonstatic -word2vec
+
+This will run the CNN-rand, CNN-static, and CNN-nonstatic models respectively in the paper.
+
+*Note: Step 1 will create the dataset with different fold-assignments than was used in the paper.
+You should still be getting a CV score of >81% with CNN-nonstatic model, though.
