@@ -43,7 +43,6 @@ def train_conv_net(datasets,
                    batch_size=50, 
                    lr_decay = 0.95,
                    conv_non_linear="relu",
-                   use_valid_set=True,
                    activations=[Iden],
                    sqr_norm_lim=9,
                    non_static=True):
@@ -118,33 +117,20 @@ def train_conv_net(datasets,
     new_data = np.random.permutation(new_data)
     n_batches = new_data.shape[0]/batch_size
     n_train_batches = int(np.round(n_batches*0.9))
-    if len(datasets)==3:
-        use_valid_set=True
-        train_set = new_data
-        val_set = datasets[1]
-        train_set_x, train_set_y = shared_dataset((train_set[:,:img_h],train_set[:,-1]))
-        val_set_x, val_set_y = shared_dataset((val_set[:,:img_h],val_set[:,-1]))
-        test_set_x = datasets[2][:,:img_h] 
-        test_set_y = np.asarray(datasets[2][:,-1],"int32")
-        n_val_batches = int(val_set.shape[0] / batch_size)
-        val_model = theano.function([index], classifier.errors(y),
-            givens={
-                  x: val_set_x[index * batch_size: (index + 1) * batch_size],
-                  y: val_set_y[index * batch_size: (index + 1) * batch_size]})
-    else:
-        test_set_x = datasets[1][:,:img_h] 
-        test_set_y = np.asarray(datasets[1][:,-1],"int32")
-        train_set = new_data[:n_train_batches*batch_size,:]
-        val_set = new_data[n_train_batches*batch_size:,:]     
-        train_set_x, train_set_y = shared_dataset((train_set[:,:img_h],train_set[:,-1]))
-        val_set_x, val_set_y = shared_dataset((val_set[:,:img_h],val_set[:,-1]))
-        n_val_batches = n_batches - n_train_batches
-        val_model = theano.function([index], classifier.errors(y),
-             givens={
-                x: val_set_x[index * batch_size: (index + 1) * batch_size],
-                y: val_set_y[index * batch_size: (index + 1) * batch_size]})
+    #divide train set into train/val sets 
+    test_set_x = datasets[1][:,:img_h] 
+    test_set_y = np.asarray(datasets[1][:,-1],"int32")
+    train_set = new_data[:n_train_batches*batch_size,:]
+    val_set = new_data[n_train_batches*batch_size:,:]     
+    train_set_x, train_set_y = shared_dataset((train_set[:,:img_h],train_set[:,-1]))
+    val_set_x, val_set_y = shared_dataset((val_set[:,:img_h],val_set[:,-1]))
+    n_val_batches = n_batches - n_train_batches
+    val_model = theano.function([index], classifier.errors(y),
+         givens={
+            x: val_set_x[index * batch_size: (index + 1) * batch_size],
+            y: val_set_y[index * batch_size: (index + 1) * batch_size]})
             
-    #make theano functions to get train/val/test errors
+    #compile theano functions to get train/val/test errors
     test_model = theano.function([index], classifier.errors(y),
              givens={
                 x: train_set_x[index * batch_size: (index + 1) * batch_size],
@@ -323,7 +309,6 @@ if __name__=="__main__":
                               filter_hs=[3,4,5],
                               conv_non_linear="relu",
                               hidden_units=[100,2], 
-                              use_valid_set=True, 
                               shuffle_batch=True, 
                               n_epochs=25, 
                               sqr_norm_lim=9,
