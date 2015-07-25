@@ -14,6 +14,7 @@ Please cite the original paper when using the data.
 Runs on Python 2.7 and Theano 0.6
 
 The code does not use GPUs. It should run much faster if you have a good GPU. See http://deeplearning.net/software/theano/tutorial/using_gpu.html for information on how to make it use GPUs.
+(People have reported up to 20x speed-up switching to a modern GPU, so this is a must if working with larger corpora.)
 
 Instructions:
 
