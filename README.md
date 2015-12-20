@@ -18,7 +18,7 @@ To process the raw data, run
 python process_data.py path
 ```
 
-where path points to the word2vec binary file (i.e. GoogleNews-vectors-negative300.bin file). 
+where path points to the word2vec binary file (i.e. `GoogleNews-vectors-negative300.bin` file). 
 This will create a pickle object called "mr.p" in the same folder, which contains the dataset
 in the right format.
 
