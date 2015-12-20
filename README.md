@@ -12,7 +12,7 @@ https://code.google.com/p/word2vec/
 
 
 ### Data Preprocessing
-To pre-process the raw data, run
+To process the raw data, run
 
 ```
 python process_data.py path
