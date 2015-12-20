@@ -16,6 +16,7 @@ import theano.tensor as T
 import re
 import warnings
 import sys
+import time
 warnings.filterwarnings("ignore")   
 
 #different non-linearities
@@ -77,7 +78,7 @@ def train_conv_net(datasets,
     Words = theano.shared(value = U, name = "Words")
     zero_vec_tensor = T.vector()
     zero_vec = np.zeros(img_w)
-    set_zero = theano.function([zero_vec_tensor], updates=[(Words, T.set_subtensor(Words[0,:], zero_vec_tensor))])
+    set_zero = theano.function([zero_vec_tensor], updates=[(Words, T.set_subtensor(Words[0,:], zero_vec_tensor))], allow_input_downcast=True)
     layer0_input = Words[T.cast(x.flatten(),dtype="int32")].reshape((x.shape[0],1,x.shape[1],Words.shape[1]))                                  
     conv_layers = []
     layer1_inputs = []
@@ -128,17 +129,20 @@ def train_conv_net(datasets,
     val_model = theano.function([index], classifier.errors(y),
          givens={
             x: val_set_x[index * batch_size: (index + 1) * batch_size],
-            y: val_set_y[index * batch_size: (index + 1) * batch_size]})
+             y: val_set_y[index * batch_size: (index + 1) * batch_size]},
+                                allow_input_downcast=True)
             
     #compile theano functions to get train/val/test errors
     test_model = theano.function([index], classifier.errors(y),
              givens={
                 x: train_set_x[index * batch_size: (index + 1) * batch_size],
-                y: train_set_y[index * batch_size: (index + 1) * batch_size]})               
+                 y: train_set_y[index * batch_size: (index + 1) * batch_size]},
+                                 allow_input_downcast=True)               
     train_model = theano.function([index], cost, updates=grad_updates,
           givens={
             x: train_set_x[index*batch_size:(index+1)*batch_size],
-            y: train_set_y[index*batch_size:(index+1)*batch_size]})     
+              y: train_set_y[index*batch_size:(index+1)*batch_size]},
+                                  allow_input_downcast = True)     
     test_pred_layers = []
     test_size = test_set_x.shape[0]
     test_layer0_input = Words[T.cast(x.flatten(),dtype="int32")].reshape((test_size,1,img_h,Words.shape[1]))
@@ -148,7 +152,7 @@ def train_conv_net(datasets,
     test_layer1_input = T.concatenate(test_pred_layers, 1)
     test_y_pred = classifier.predict(test_layer1_input)
     test_error = T.mean(T.neq(test_y_pred, y))
-    test_model_all = theano.function([x,y], test_error)   
+    test_model_all = theano.function([x,y], test_error, allow_input_downcast = True)   
     
     #start training over mini-batches
     print '... training'
@@ -157,7 +161,8 @@ def train_conv_net(datasets,
     val_perf = 0
     test_perf = 0       
     cost_epoch = 0    
-    while (epoch < n_epochs):        
+    while (epoch < n_epochs):
+        start_time = time.time()
         epoch = epoch + 1
         if shuffle_batch:
             for minibatch_index in np.random.permutation(range(n_train_batches)):
@@ -171,7 +176,7 @@ def train_conv_net(datasets,
         train_perf = 1 - np.mean(train_losses)
         val_losses = [val_model(i) for i in xrange(n_val_batches)]
         val_perf = 1- np.mean(val_losses)                        
-        print('epoch %i, train perf %f %%, val perf %f' % (epoch, train_perf * 100., val_perf*100.))
+        print('epoch: %i, training time: %.2f secs, train perf: %.2f %%, val perf: %.2f' % (epoch, time.time()-start_time, train_perf * 100., val_perf*100.))
         if val_perf >= best_val_perf:
             best_val_perf = val_perf
             test_loss = test_model_all(test_set_x,test_set_y)        

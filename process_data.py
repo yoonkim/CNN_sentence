@@ -52,8 +52,8 @@ def get_W(word_vecs, k=300):
     """
     vocab_size = len(word_vecs)
     word_idx_map = dict()
-    W = np.zeros(shape=(vocab_size+1, k))            
-    W[0] = np.zeros(k)
+    W = np.zeros(shape=(vocab_size+1, k), dtype='float32')            
+    W[0] = np.zeros(k, dtype='float32')
     i = 1
     for word in word_vecs:
         W[i] = word_vecs[word]
