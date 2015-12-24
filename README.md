@@ -68,3 +68,9 @@ He also wrote a [nice tutorial](http://www.wildml.com/2015/12/implementing-a-cnn
 
 #### Torch
 Coming soon.
+
+### Hyperparameters
+At the time of my original experiments I did not have access to a GPU so I could not run a lot of different experiments.
+Hence the paper is missing a lot of things like ablation studies and variance in performance.
+
+Ye Zhang has written a [very nice paper](http://arxiv.org/abs/1510.03820) doing an extensive analysis of model variants (e.g. filter widths, k-max pooling, word2vec vs Glove, etc.) and their effect on performance.
